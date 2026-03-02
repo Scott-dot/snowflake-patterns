@@ -1,37 +1,35 @@
 # Snowflake Transformation Patterns
 
-Production SQL patterns from 2 years building data pipelines in Snowflake, processing millions of records daily.
+Production SQL patterns from building data pipelines at Coles. Most of this comes from working with supply chain data - shipments, distribution centers, transport management - processing millions of records daily.
 
-## 📋 Patterns Included
+## Patterns
 
-### 1. SCD2 Implementation
-Slowly Changing Dimension Type 2 pattern for tracking historical changes while maintaining query performance.
+### SCD2 Implementation
+Tracking historical changes while keeping queries fast. Built this to handle shipment status updates across our distribution network.
 
-**Impact:** 98% compression (70M+ → 1.5M records) while preserving full audit trail
+**The problem:** Original approach was storing every status change as a new row. Table hit 71 million rows and queries were taking 45+ seconds.
 
-[View Pattern](./scd2/)
+**The solution:** SCD2 pattern that only stores actual changes. Compressed it down to 1.5 million rows, queries now run in about 3 seconds. Full history still there for audit.
 
-### 2. Variant Data Type Handling *(Coming Soon)*
-Working with semi-structured JSON data in Snowflake's VARIANT columns.
-
-### 3. Dynamic Table Optimization *(Coming Soon)*
-When to use dynamic tables vs traditional views for materialization.
-
-## 🎯 About These Patterns
-
-These patterns come from real production work building ETL pipelines for supply chain analytics:
-- High-volume data (70M+ records)
-- Complex transformations
-- Performance-critical queries
-- Audit compliance requirements
-
-## 🔧 Technologies
-
-- Snowflake
-- SQL
-- Data Modeling (SCD2, dimensional modeling)
-- ETL/ELT patterns
+[See the implementation](./scd2/)
 
 ---
 
-*Note: All code samples use sanitized/generic names. Business logic and patterns are real.*
+### More patterns coming soon:
+- Working with Snowflake VARIANT types for semi-structured data
+- Dynamic tables vs views - when to use what
+- Clustering and performance optimization
+
+## About This Work
+
+These patterns are from real production pipelines I built for supply chain analytics:
+- High volume (70M+ records)
+- Performance-critical (business dashboards need to be fast)
+- Audit requirements (need full history)
+- Complex transformations (multiple source systems, data quality issues)
+
+All code samples use sanitized names and generic examples, but the logic and patterns are what I actually use in production.
+
+## Tech
+
+Built with Snowflake SQL. Patterns apply to dimensional modeling, ETL/ELT workflows, and data warehouse design generally.
