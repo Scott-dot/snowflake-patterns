@@ -1,76 +1,32 @@
-# SCD2 Implementation Pattern
+# SCD2 Implementation
 
-## 🎯 The Problem
+## The Problem
 
-Tracking historical changes in shipment status across distribution centers. Original approach stored every status change as a separate row.
+I had to track shipment status changes across our distribution network. Every time a shipment status updated, we were creating a new row. After a few months, the table hit 71 million rows and queries were taking 45+ seconds. Most of that data was just duplicates - if a shipment didn't change for weeks, we still had the same row over and over.
 
-**Issues:**
-- 70+ million rows (mostly duplicates)
-- Query times: 45+ seconds
-- Difficult to get "current state" view
-- Complex queries to find status at specific dates
+## What I Built
 
-## ✅ The Solution
+Set up a Type 2 Slowly Changing Dimension table that only stores actual changes:
 
-Implemented Slowly Changing Dimension Type 2 (SCD2) pattern:
-- Compress historical changes
-- Flag current records with `is_current`
-- Track validity periods with `effective_from` and `effective_to`
-- Maintain complete audit trail
+- Each shipment gets one row per status change (not one per day)
+- Tracks when each version was valid (effective_from/effective_to dates)
+- Has an is_current flag for quick "what's happening now" queries
+- Kept full history for audit
 
-## 📊 Results
+This got the table down to 1.5M rows. Queries that were taking 45 seconds now run in 3.
 
-- **98% reduction:** 70M+ → 1.5M rows
-- **Query time:** 45s → 3s for current state
-- **Audit compliance:** Full history preserved
-- **Storage costs:** Significant reduction
+## Code
 
-## 💻 Implementation
-```sql
--- See scd2-implementation.sql for full code
-```
+The SQL is pretty straightforward - use window functions to get the next update time for each shipment, then create validity periods between updates. See the .sql file for the full implementation.
 
-## 🔑 Key Design Decisions
+## When to Use This
 
-**Why `effective_from` / `effective_to` over version numbers?**
-- More intuitive for business users
-- Easier date-range queries for audit
-- Natural handling of "current" (effective_to = '9999-12-31')
+Good for situations where:
+- You need to track changes over time
+- Most queries just need current state
+- You have audit requirements
 
-**Why `is_current` flag?**
-- Most queries only need current state
-- Simple `WHERE is_current = TRUE` filter
-- Indexed for performance
-
-**Why hash key on natural key?**
-- Faster updates and lookups
-- Consistent identifier across systems
-
-## 📖 Usage Examples
-```sql
--- Get current state only (fast)
-SELECT * FROM shipments_scd2 
-WHERE is_current = TRUE;
-
--- Get state at specific date (audit)
-SELECT * FROM shipments_scd2 
-WHERE '2024-01-15' BETWEEN effective_from AND effective_to;
-
--- Track all changes for specific shipment
-SELECT * FROM shipments_scd2 
-WHERE shipment_id = 12345 
-ORDER BY effective_from;
-```
-
-## 🏗️ When to Use This Pattern
-
-**Good fit:**
-- Need historical tracking
-- Frequent updates to records
-- Audit requirements
-- "Current state" is most common query
-
-**Not ideal:**
-- Data never changes (use simple table)
-- Don't need history (use SCD1 or updates)
-- Real-time requirements (consider streaming)
+Not great if:
+- Your data doesn't change much
+- You don't need history
+- You're doing real-time streaming
