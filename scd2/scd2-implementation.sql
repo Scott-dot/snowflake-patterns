@@ -61,7 +61,7 @@ CREATE INDEX idx_shipment ON shipments_scd2(shipment_id);
 -- USAGE EXAMPLES
 -- ============================================
 
--- Example 1: Get current state only (most common query)
+-- Example 1: Get current state only
 -- Fast: Uses is_current index
 SELECT 
     shipment_id,
