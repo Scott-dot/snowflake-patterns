@@ -141,4 +141,3 @@ SELECT
     COUNT(DISTINCT shipment_id) as unique_shipments,
     COUNT(*) / COUNT(DISTINCT shipment_id) as avg_changes_per_shipment
 FROM shipments_scd2;
-```
