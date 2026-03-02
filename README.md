@@ -9,7 +9,7 @@ Slowly Changing Dimension Type 2 pattern for tracking historical changes while m
 
 **Impact:** 98% compression (70M+ → 1.5M records) while preserving full audit trail
 
-[View Pattern →](./scd2/)
+[View Pattern](./scd2/)
 
 ### 2. Variant Data Type Handling *(Coming Soon)*
 Working with semi-structured JSON data in Snowflake's VARIANT columns.
